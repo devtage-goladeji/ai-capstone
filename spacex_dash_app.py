@@ -60,9 +60,11 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
 def get_pie_chart(entered_site):
     # filtered_df = spacex_df[spacex_df['Launch Site']==entered_site]
     if entered_site == 'ALL':
-        fig = px.pie(spacex_df, values='class', 
-        names='Launch Site', 
-        title='Launch Records For Sites: ALL')
+        spacex_df_success = spacex_df.loc[spacex_df['class']==1,['Launch Site','class']]
+        df_final = spacex_df_success.groupby('Launch Site').sum().reset_index()
+        fig = px.pie(df_final, values='class', names='Launch Site', labels='Launch Site', 
+        title='Total Successful Launch Records for ALL Sites')
+        fig.update_traces(textinfo='value') # change it to numbers instead of %
         return fig
     else:
         # return the outcomes piechart for a selected site
@@ -70,9 +72,8 @@ def get_pie_chart(entered_site):
         new_df = filtered_df['class'].value_counts().reset_index()
         new_df.columns = ['class', 'count']
         title = "Launch Records For Sites: {}".format(entered_site)
-        fig = px.pie(new_df, values='count', 
-        names='class', 
-        title=title)
+        fig = px.pie(new_df, values='count', names='class',  title=title)
+        fig.update_traces(textinfo='value') # change it to numbers instead of %
         return fig
 
 
@@ -80,8 +81,7 @@ def get_pie_chart(entered_site):
 # Add a callback function for `site-dropdown` and `payload-slider` as inputs, `success-payload-scatter-chart` as output
 
 @app.callback(Output(component_id='success-payload-scatter-chart', component_property='figure'),
-            [Input(component_id='site-dropdown', component_property='value'),
-             Input(component_id='payload-slider', component_property='value')])
+            [Input(component_id='site-dropdown', component_property='value'), Input(component_id='payload-slider', component_property='value')])
 def get_scatter_plot(entered_site, payload_value):
 
     expanded_title=" Scatter plots with the parameters {0} | {1}".format(entered_site, str(payload_value))
