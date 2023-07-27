@@ -73,7 +73,7 @@ def get_pie_chart(entered_site):
         new_df.columns = ['class', 'count']
         title = "Launch Records For Sites: {}".format(entered_site)
         fig = px.pie(new_df, values='count', names='class',  title=title)
-        fig.update_traces(textinfo='value') # change it to numbers instead of %
+        # fig.update_traces(textinfo='value') # change it to numbers instead of %
         return fig
 
 
@@ -84,16 +84,21 @@ def get_pie_chart(entered_site):
             [Input(component_id='site-dropdown', component_property='value'), Input(component_id='payload-slider', component_property='value')])
 def get_scatter_plot(entered_site, payload_value):
 
+    labels_={'class':'Class (Launch Outcomes)', 'Payload Mass (kg)':'Payload Mass (kg)'}
+
     expanded_title=" Scatter plots with the parameters {0} | {1}".format(entered_site, str(payload_value))
 
     if entered_site == 'ALL':
-        fig = px.scatter(data_frame=spacex_df, x='Payload Mass (kg)', y='class', color='Booster Version Category', title=expanded_title)
+        filtered_df = spacex_df[(spacex_df['Payload Mass (kg)'].between(payload_value[0],payload_value[1]))]
+        fig = px.scatter(data_frame=filtered_df, x='Payload Mass (kg)', y='class', color='Booster Version Category', title=expanded_title, labels=labels_)
+        
         return fig
     else:
         filtered_df = spacex_df[(spacex_df['Launch Site']==entered_site) &  
                                 (spacex_df['Payload Mass (kg)'].between(payload_value[0],payload_value[1]))]
         #filtered_df = spacex_df[(spacex_df['Launch Site']==entered_site)]
-        fig = px.scatter(data_frame=filtered_df, x='Payload Mass (kg)', y='class', color='Booster Version Category', title=expanded_title)
+        fig = px.scatter(data_frame=filtered_df, x='Payload Mass (kg)', y='class', color='Booster Version Category', title=expanded_title, labels=labels_)
+        
         return fig
 
 
